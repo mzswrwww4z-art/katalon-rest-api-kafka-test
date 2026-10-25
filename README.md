@@ -131,7 +131,7 @@ The HackerRank brief asks for a public GitHub or GitLab repository. This project
 3. Copy the real HTTPS or SSH remote URL shown by GitHub and add it, then push:
 
    ```sh
-   git remote add origin <paste-your-GitHub-repository-URL>
+   git remote add origin <[katalon-rest-api-kafka-test](https://github.com/mzswrwww4z-art/katalon-rest-api-kafka-test)>
    git push -u origin main
    ```
 
