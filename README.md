@@ -1,6 +1,21 @@
-# Katalon REST API and Kafka demo
+# Katalon REST API and Kafka Integration Test
 
-This Katalon Studio project was prepared for the HackerRank brief shown in the attached screenshot. It contains one REST flow where Katalon creates a resource with `POST` and reads it back with `GET`, plus a Kafka flow where Katalon consumes and validates a JSON event.
+This Katalon Studio project demonstrates the two scenarios requested in the HackerRank technical test:
+
+1. Katalon acts as a REST API producer and consumer: it creates a message with `POST`, reads it with `GET`, and validates the response.
+2. Katalon acts as a Kafka consumer: it polls a topic and validates a JSON event.
+
+The project includes a small local REST API and a Docker-based Kafka broker so the scenarios have a reproducible local environment.
+
+**Public repository:** [katalon-rest-api-kafka-test](https://github.com/mzswrwww4z-art/katalon-rest-api-kafka-test)
+
+## Assignment coverage
+
+| Requirement | Project implementation |
+| --- | --- |
+| RESTful API producer and consumer | The REST Producer and Consumer test sends `POST /api/messages`, then `GET /api/messages/{id}`, and checks the status codes and returned data. |
+| Kafka consumer | The Consume Event test uses a custom Katalon keyword backed by the Apache Kafka Java client. It waits for a JSON event with the expected `eventId`. |
+| Public source repository | This project is available in the public GitHub repository linked above. |
 
 ## Project structure
 
@@ -20,49 +35,38 @@ support/kafka/sample-message.json
 support/kafka/publish-sample.sh
 docker-compose.yml
 build.gradle
+README.md
 ```
-
-## What the tests do
-
-### REST API: producer and consumer
-
-The `REST Producer and Consumer` test case builds requests with Katalon’s `RequestObject` and sends them using Katalon’s `WS.sendRequest` keyword:
-
-1. `POST /api/messages` creates a message and returns its generated ID.
-2. `GET /api/messages/{id}` reads the saved message.
-3. The test checks status codes, IDs, event type, and payload.
-
-The small Node.js API under `support/api` is the local system under test. Its data is held in memory and is cleared when the service restarts.
-
-### Kafka: consumer
-
-The `Consume Event` test uses Apache’s Java Kafka client from a Katalon custom keyword. It subscribes to the configured topic and polls for a JSON record whose `eventId` matches the configured value. The poll has a timeout, uses a unique consumer group, and does not commit offsets.
 
 ## Requirements
 
-- Katalon Studio with a supported Java runtime (Studio 9/10 use Java 17; Studio 11 uses Java 21)
-- Docker Desktop or Docker Engine with Docker Compose
-- Network access the first time Gradle downloads the Kafka client and Docker downloads the service images
+- Katalon Studio with the Java runtime supported by your Studio version. Studio 9/10 use Java 17; Studio 11 uses Java 21.
+- Docker Desktop or Docker Engine with Docker Compose.
+- Internet access the first time Gradle downloads the Kafka client and Docker downloads the service images.
 
-The sample runs a local Kafka broker in plaintext mode bound to `127.0.0.1`. This is for a local demonstration only; do not expose this broker to an untrusted network.
+The local Kafka broker uses plaintext and binds to `127.0.0.1`. It is intended for local demonstration only; do not expose it to an untrusted network.
 
 ## Setup and run
 
-1. Open `KatalonApiKafkaDemo.prj` in Katalon Studio. If Studio asks to trust the project, review the files and trust the project before execution.
-2. Resolve the Kafka Java client dependency. In Katalon Studio, open the **Gradle Tasks** view and run `katalonCopyDependencies` for this project. If using a system Gradle installation instead, run `gradle katalonCopyDependencies` from the project folder. The task copies the Kafka client and its required libraries into `Drivers/`; those generated JAR files are ignored by Git. After it completes, select **Project > Refresh** so Katalon reloads the classpath.
-3. Start the local services from this folder:
+Run these steps from the project folder.
+
+1. Open `KatalonApiKafkaDemo.prj` in Katalon Studio. Review the project files before trusting the project if Studio prompts you.
+2. Resolve the Kafka Java client dependency. In Katalon Studio, open **Gradle Tasks** and run `katalonCopyDependencies`. When it completes, select **Project > Refresh** so Katalon reloads the classpath. If you use system Gradle, run `gradle katalonCopyDependencies` from the project folder instead. Generated JAR files in `Drivers/` are ignored by Git.
+3. Start the local services:
 
    ```sh
    docker compose up -d
    ```
 
-4. Wait until the REST API is ready:
+4. Wait until the REST API responds successfully:
 
    ```sh
    curl --fail http://127.0.0.1:8080/health
    ```
 
-   It should return `{"status":"ok"}`. Also wait for the Kafka container to become healthy, then create the sample topic:
+   The response should be `{"status":"ok"}`. Check `docker compose ps` and wait until Kafka reports healthy.
+
+5. Create the Kafka topic:
 
    ```sh
    docker compose exec kafka /opt/kafka/bin/kafka-topics.sh \
@@ -71,74 +75,40 @@ The sample runs a local Kafka broker in plaintext mode bound to `127.0.0.1`. Thi
      --partitions 1 --replication-factor 1
    ```
 
-5. Publish the sample event before running the Katalon suite:
+6. Publish the sample event before running the Katalon suite:
 
    ```sh
    ./support/kafka/publish-sample.sh
    ```
 
-   The sample event ID is `demo-event-001`. If you edit `support/kafka/sample-message.json`, update the matching Katalon profile value or environment variable too.
+   The sample event ID is `demo-event-001`. If you change `support/kafka/sample-message.json`, update the expected ID in the Katalon execution profile or environment variable too.
 
-6. In Katalon Studio, open **Test Suites > Integration Demo** and run it with the `default` execution profile. The REST case runs first; the Kafka case follows.
+7. In Katalon Studio, open **Test Suites > Integration Demo** and run it with the `default` execution profile. The REST test case runs first, followed by the Kafka consumer test case.
 
-To stop the local services:
+Stop the local services when you are finished:
 
 ```sh
 docker compose down
 ```
 
-## Safe configuration
+## Configuration
 
-The committed profile contains local demo endpoints and a non-secret sample event ID. Environment variables override the values shown below:
+The default profile uses local demo services and non-secret sample data. Environment variables override the corresponding values.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `API_BASE_URL` | `http://127.0.0.1:8080` | REST demo base URL |
+| `API_BASE_URL` | `http://127.0.0.1:8080` | Base URL for the local REST API |
 | `KAFKA_BOOTSTRAP_SERVERS` | `127.0.0.1:9092` | Kafka broker address |
-| `KAFKA_TOPIC` | `qa.events` | Topic to consume; the sample producer also accepts this variable |
-| `KAFKA_EXPECTED_EVENT_ID` | `demo-event-001` | JSON `eventId` expected by the consumer test |
-| `KAFKA_POLL_TIMEOUT_MS` | `10000` | Maximum wait for the matching Kafka message |
-| `KAFKA_SECURITY_PROTOCOL` | `PLAINTEXT` | Set to the protocol required by a secured broker, such as `SASL_SSL` |
-| `KAFKA_SASL_MECHANISM` | empty | Required for a SASL protocol |
-| `KAFKA_SASL_JAAS_CONFIG` | empty | Required for a SASL protocol; supply it through the local environment or your CI secret store |
+| `KAFKA_TOPIC` | `qa.events` | Topic consumed by Katalon and used by the sample publisher |
+| `KAFKA_EXPECTED_EVENT_ID` | `demo-event-001` | Event ID expected by the Kafka test |
+| `KAFKA_POLL_TIMEOUT_MS` | `10000` | Maximum time the consumer waits for the event |
+| `KAFKA_SECURITY_PROTOCOL` | `PLAINTEXT` | Kafka security protocol |
+| `KAFKA_SASL_MECHANISM` | empty | SASL mechanism when using a SASL-secured broker |
+| `KAFKA_SASL_JAAS_CONFIG` | empty | SASL JAAS configuration when using a SASL-secured broker |
 
-For a secured Kafka service, launch Katalon from an environment that has the required variables set. Keep passwords, tokens, JAAS strings, private keys, and real customer data out of the project files and Git history. The demo does not require any credentials.
+The demo requires no credentials. Keep passwords, tokens, JAAS strings, private keys, and real customer data out of the project files and GitHub. The `.gitignore` excludes `.env` files, reports, and generated dependency JARs.
 
-## Troubleshooting
+## Notes
 
-- **REST connection refused:** check `docker compose ps` and confirm `http://127.0.0.1:8080/health` responds with `{"status":"ok"}`.
-- **Kafka connection refused:** wait until `docker compose ps` reports the broker healthy and confirm the topic exists with `docker compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list`.
-- **Kafka event timeout:** publish the sample after creating the topic, and ensure `KAFKA_EXPECTED_EVENT_ID` matches the event JSON exactly.
-- **Kafka classes cannot be resolved:** run `katalonCopyDependencies`, then refresh/reopen the project so Studio reloads `Drivers/`.
-
-## Publish a public repository
-
-The HackerRank brief asks for a public GitHub or GitLab repository. This project is prepared locally; it has no remote URL yet.
-
-### GitHub
-
-1. On GitHub, create a new repository and set visibility to **Public**. Leave repository initialization options such as README unchecked, since this folder already contains the project files.
-2. From this project folder, initialize Git and make the first commit:
-
-   ```sh
-   git init
-   git add .
-   git status
-   git commit -m "Add Katalon REST and Kafka integration demo"
-   git branch -M main
-   ```
-
-3. Copy the real HTTPS or SSH remote URL shown by GitHub and add it, then push:
-
-   ```sh
-   git remote add origin <[katalon-rest-api-kafka-test](https://github.com/mzswrwww4z-art/katalon-rest-api-kafka-test)>
-   git push -u origin main
-   ```
-
-### GitLab
-
-Create a **Public** blank project, then use its real clone URL in the same `git remote add origin ...` and `git push -u origin main` steps.
-
-Before submitting, confirm that the repository opens while signed out (or in a private browser window), and that the Katalon project file, test cases, scripts, setup files, and README are visible. The repository URL must be copied from the hosting service after you create it; no URL is included here because none exists yet.
-
-In the HackerRank answer box, paste the public repository URL after the push completes.
+- The sample REST API keeps records in memory. Its data is cleared when the API service restarts.
+- The Kafka sample event is published separately before the test suite runs; Katalon remains the Kafka consumer in this scenario.
