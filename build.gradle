@@ -1,0 +1,13 @@
+plugins {
+    id 'java-library'
+    id 'com.katalon.gradle-plugin' version '0.2.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Katalon's Kafka consumer custom keyword uses the official Java client.
+    implementation 'org.apache.kafka:kafka-clients:4.4.0'
+}

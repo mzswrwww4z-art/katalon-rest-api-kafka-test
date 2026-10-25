@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Katalon subscribes to a Kafka topic, polls with a bounded timeout, and validates a configured JSON event.</description>
+   <name>Consume Event</name>
+   <tag>Kafka,consumer</tag>
+   <comment></comment>
+   <testCaseGuid>3b6719d4-0db0-4e6d-9758-51eb2e594a09</testCaseGuid>
+</TestCaseEntity>

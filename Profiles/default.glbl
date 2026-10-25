@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalVariableEntities>
+   <description>Safe local defaults for the demo services.</description>
+   <name>default</name>
+   <tag></tag>
+   <defaultProfile>true</defaultProfile>
+   <GlobalVariableEntity>
+      <description>Local REST demo service base URL. Can be overridden with API_BASE_URL.</description>
+      <initValue>'http://127.0.0.1:8080'</initValue>
+      <name>apiBaseUrl</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>Local Kafka listener. Can be overridden with KAFKA_BOOTSTRAP_SERVERS.</description>
+      <initValue>'127.0.0.1:9092'</initValue>
+      <name>kafkaBootstrapServers</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>Sample topic created in the local Docker broker.</description>
+      <initValue>'qa.events'</initValue>
+      <name>kafkaTopic</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>Expected event identifier in support/kafka/sample-message.json.</description>
+      <initValue>'demo-event-001'</initValue>
+      <name>kafkaExpectedEventId</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>Maximum time to wait for a matching Kafka record.</description>
+      <initValue>10000</initValue>
+      <name>kafkaPollTimeoutMs</name>
+   </GlobalVariableEntity>
+</GlobalVariableEntities>

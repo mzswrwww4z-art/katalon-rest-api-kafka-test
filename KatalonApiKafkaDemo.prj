@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+   <description>HackerRank technical test demo: REST API producer/consumer flow and Kafka consumer test.</description>
+   <name>KatalonApiKafkaDemo</name>
+   <tag></tag>
+   <UUID>36cc135e-f2e6-4a90-a001-4d855dc365af</UUID>
+   <freeLicense>false</freeLicense>
+   <migratedVersion>5.9.0</migratedVersion>
+   <pageLoadTimeout>0</pageLoadTimeout>
+   <projectFileLocation></projectFileLocation>
+   <sourceContent>
+      <sourceFolderList>
+         <sourceFolderConfiguration><url>Include/scripts/groovy</url></sourceFolderConfiguration>
+      </sourceFolderList>
+      <systemFolderList>
+         <systemFolderConfiguration><url>Include/scripts/groovy</url></systemFolderConfiguration>
+         <systemFolderConfiguration><url>Include/features</url></systemFolderConfiguration>
+         <systemFolderConfiguration><url>Include/config</url></systemFolderConfiguration>
+      </systemFolderList>
+   </sourceContent>
+   <timeStampInProperties>true</timeStampInProperties>
+   <type>WEBUI</type>
+</Project>
